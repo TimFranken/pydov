@@ -291,12 +291,18 @@ class AbstractSearch(object):
             )
 
         if query is not None:
-            if not isinstance(query, owslib.fes.OgcExpression):
+            if not isinstance(query, owslib.fes.OgcExpression) and not isinstance(query, list):
                 raise InvalidSearchParameterError(
-                    "Query should be an owslib.fes.OgcExpression.")
+                    "Query should be a (list of) owslib.fes.OgcExpression or list of OgcExpression")
+
+            if isinstance(query, list):
+                for q in query:
+                    if not isinstance(q, owslib.fes.OgcExpression) and not isinstance(query, list):
+                        raise InvalidSearchParameterError(
+                            "Query should be a (list of) owslib.fes.OgcExpression or list of OgcExpression")
 
             filter_request = FilterRequest()
-            filter_request = filter_request.setConstraint(query)
+            filter_request = filter_request.setConstraintList(query)
 
             self._init_fields()
             for property_name in filter_request.findall(
@@ -432,7 +438,10 @@ class AbstractSearch(object):
         filter_request = None
         if query is not None:
             filter_request = FilterRequest()
-            filter_request = filter_request.setConstraint(query)
+            if isinstance(query, list):
+                filter_request = filter_request.setConstraintList(query)
+            else:
+                filter_request = filter_request.setConstraint(query)
 
         if filter_request is not None:
             for property_name in filter_request.findall(
