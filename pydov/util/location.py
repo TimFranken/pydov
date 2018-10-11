@@ -57,6 +57,18 @@ class Point(AbstractLocation):
         return self.element
 
 
+class GMLGeometry(AbstractLocation):
+    def __init__(self, gml_geom):
+
+        try:
+            self.element = etree.fromstring(gml_geom)
+        except etree.XMLSyntaxError as e:
+            raise e
+
+    def get_element(self):
+        return self.element
+
+
 class Within(AbstractLocationFilter):
     def __init__(self, box):
         self.box = box
